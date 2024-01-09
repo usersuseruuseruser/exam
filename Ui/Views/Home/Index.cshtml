@@ -1,0 +1,82 @@
+﻿@using Ui.Models
+@using System.ComponentModel
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Models.Dtos
+@using Modelss.Models
+@model Modelss.Models.Result?
+@{
+    ViewData["Title"] = "DnD fight";
+}
+<form method="post" asp-action="Index">
+    <div>
+        <label for="Player_Name">Name</label>
+        <input type="text" id="Player_Name" name="Player.Name" value=""/>
+    </div>
+    <div>
+        <label for="Player_HitPoints">Hit Points</label>
+        <input type="number" id="Player_HitPoints" name="Player.HitPoints" value=""/>
+    </div>
+    <div>
+        <label for="Player_AttackModifier">Attack Modifier</label>
+        <input type="number" id="Player_AttackModifier" name="Player.AttackModifier" value=""/>
+    </div>
+    <div>
+        <label for="Player_AttacksPerRound">Attacks Per Round</label>
+        <input type="number" id="Player_AttacksPerRound" name="Player.AttacksPerRound" value=""/>
+    </div>
+    <div>
+        <label for="Player_Damage">Damage</label>
+        <input type="text" id="Player_Damage" name="Player.Damage" value=""/>
+    </div>
+    <div>
+        <label for="Player_DamageModifier">Damage Modifier</label>
+        <input type="number" id="Player_DamageModifier" name="Player.DamageModifier" value=""/>
+    </div>
+    <div>
+        <label for="Player_Armor">Armor</label>
+        <input type="number" id="Player_Armor" name="Player.Armor" value=""/>
+    </div>
+    <button type="submit">Сохранить</button>
+</form>    
+@if (Model is not null)
+{
+    <h2>Победитель: @Model.Winner</h2>
+    foreach (var round in Model.Rounds!)
+    {
+        <h3>Раунд @round.RoundNumber</h3>
+        foreach (var roundLog in round.Logs)
+        {
+            <h3>@roundLog.CharacterName</h3>
+            for (int i = 0; i < roundLog.DiceRoll.Length; i++)
+            {
+                if (roundLog.AttackType[i] == AttackType.Miss && roundLog.DiceRoll[i] == 1)
+                {
+                    <div>критический промах. выпала 1</div>
+                }
+                else if (roundLog.AttackType[i] == AttackType.Miss)
+                {
+                    <div>
+                        @roundLog.DiceRoll[i] <text>(+@roundLog.AttackModifier)</text>
+                        меньше @roundLog.EnemyArmor <text>промах.</text>
+                    </div>
+                }
+                else if (roundLog.AttackType[i] == AttackType.Critical)
+                {
+                    <div>
+                        20 <text>(+@roundLog.AttackModifier)</text> критическое попадание.
+                        @roundLog.DiceRoll[i] <text>(+@roundLog.DamageModifier)</text> * 2
+                        наносит @roundLog.Damage[i] урона @roundLog.EnemyName
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        @roundLog.DiceRoll[i] <text>(+@roundLog.AttackModifier)</text> больше @roundLog.EnemyArmor,
+                        попадание. @roundLog.DiceRoll[i] <text>(+@roundLog.DamageModifier)</text>
+                        наносит @roundLog.Damage[i] <text>урона персонажу (@roundLog.EnemyHp[i])</text>
+                    </div>
+                }
+            }
+        }
+    }
+}
